@@ -13,7 +13,8 @@ project1/
 ├── idlex/                                   # 源码
 │   ├── backend/                             # FastAPI 后端
 │   ├── web/                                 # React 前端
-│   ├── start.bat                            # Windows 一键启动脚本
+│   ├── run.bat                              # Windows 后台启动（运行）
+│   ├── stop.bat                             # Windows 停止服务
 │   └── README.md                            # 源码级详细说明（推荐先读）
 ├── _doc1.md                                 # 项目说明文档（PRD）Markdown 版
 ├── _doc2.md                                 # 技术架构文档 Markdown 版
@@ -39,7 +40,7 @@ project1/
 
 ### 方式 A：一键启动（推荐演示）
 
-双击根目录下的 `idlex/start.bat`，脚本会自动完成：创建后端虚拟环境 → 安装依赖 → 构建前端产物 → 启动服务并打开浏览器。
+双击根目录下的 `idlex/run.bat`，脚本会自动完成：创建后端虚拟环境 → 安装依赖 → 构建前端产物 → 后台启动服务并打开浏览器；需要关闭时双击 `idlex/stop.bat`。服务日志窗口已最小化在任务栏，点开即可查看。
 
 访问 <http://127.0.0.1:8000> 即可。后端会直接托管前端 `web/dist` 构建产物。
 

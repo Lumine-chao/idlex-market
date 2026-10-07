@@ -12,6 +12,7 @@ venv/
 *.db
 *.sqlite3
 uploads/
+*.pid
 
 # ---- 前端 ----
 node_modules/
