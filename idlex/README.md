@@ -6,7 +6,7 @@
 
 | 端 | 技术 |
 | --- | --- |
-| 后端 | Python 3.11 · FastAPI · SQLAlchemy(Async) · SQLite(aiosqlite) · PyJWT · Argon2 |
+| 后端 | Python 3.11 · FastAPI · SQLAlchemy(Async) · MySQL 8.0(aiomysql) · PyJWT · Argon2 |
 | 前端 | React 18 · TypeScript · Vite · Ant Design 5 · Zustand · React Router 6 |
 | 实时通信 | WebSocket（卖家/买家即时消息 + 未读推送） |
 
@@ -40,6 +40,17 @@ idlex/
 
 ## 快速启动
 
+### 前置条件：MySQL 8.0
+
+默认连接串 `mysql+aiomysql://idlex:idlex123456@127.0.0.1:3306/idlex`，首次运行前先建库建号（可用环境变量 `DB_URL` 覆盖）：
+
+```sql
+CREATE DATABASE idlex DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'idlex'@'%' IDENTIFIED BY 'idlex123456';
+GRANT ALL PRIVILEGES ON idlex.* TO 'idlex'@'%';
+FLUSH PRIVILEGES;
+```
+
 ### 方式 A：一键运行 / 停止（推荐）
 
 - `run.bat`：**后台**启动。首次运行会自动建虚拟环境、装依赖、构建前端；服务就绪后自动打开浏览器，并把进程号写入 `run.pid`。服务日志窗口已最小化在任务栏，点开即可查看。
@@ -53,7 +64,7 @@ idlex/
 # 1. 后端
 cd backend
 python -m venv .venv && .\.venv\Scripts\activate
-pip install -r requirements.txt         # 内含 sqlalchemy[asyncio]
+pip install -r requirements.txt         # 内含 sqlalchemy[asyncio] 与 aiomysql
 python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 
 # 2. 前端（首次需先构建产物；之后改前端需重新 npm run build）

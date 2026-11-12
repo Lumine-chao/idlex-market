@@ -82,7 +82,7 @@ async def list_conversations(user: User = Depends(get_current_user_async),
     convos = (await db.execute(
         select(Conversation).where((Conversation.buyer_id == user.id) |
                                    (Conversation.seller_id == user.id))
-        .order_by(Conversation.last_message_at.desc().nullslast())
+        .order_by(Conversation.last_message_at.is_(None), Conversation.last_message_at.desc())
     )).scalars().all()
     result = []
     for c in convos:

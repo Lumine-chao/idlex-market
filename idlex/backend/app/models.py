@@ -1,6 +1,6 @@
-"""ORM 模型（对齐架构文档中的数据实体，消息在开发环境落 SQLite 而非 MongoDB）"""
+"""ORM 模型（对齐架构文档中的数据实体，消息落 MySQL 而非 MongoDB）"""
 from datetime import datetime, timezone
-from sqlalchemy import (BigInteger, String, Text, Integer, SmallInteger,
+from sqlalchemy import (String, Text, Integer, SmallInteger,
                         Numeric, Boolean, DateTime, ForeignKey, JSON, UniqueConstraint)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .db import Base
@@ -11,7 +11,7 @@ def utcnow():
 
 
 def ensure_utc(dt: datetime | None) -> datetime | None:
-    """SQLite 读回的时间不带时区，统一补齐为 UTC，避免与 aware 时间相减报错。"""
+    """MySQL DATETIME 读回的时间不带时区，统一补齐为 UTC，避免与 aware 时间相减报错。"""
     if dt is None:
         return None
     return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
@@ -42,7 +42,7 @@ class User(Base):
 class Address(Base):
     __tablename__ = "user_addresses"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id"), nullable=False)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
     receiver: Mapped[str] = mapped_column(String(32), nullable=False)
     phone: Mapped[str] = mapped_column(String(11), nullable=False)
     province: Mapped[str] = mapped_column(String(32), nullable=False)
@@ -57,7 +57,7 @@ class Category(Base):
     __tablename__ = "categories"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(32), nullable=False)
-    parent_id: Mapped[int | None] = mapped_column(BigInteger, default=None)
+    parent_id: Mapped[int | None] = mapped_column(Integer, default=None)
     level: Mapped[int] = mapped_column(SmallInteger, default=1)
     sort: Mapped[int] = mapped_column(Integer, default=0)
 
@@ -65,10 +65,10 @@ class Category(Base):
 class Item(Base):
     __tablename__ = "items"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    seller_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id"), nullable=False)
+    seller_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
     title: Mapped[str] = mapped_column(String(100), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
-    category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("categories.id"), nullable=False)
+    category_id: Mapped[int] = mapped_column(Integer, ForeignKey("categories.id"), nullable=False)
     condition_level: Mapped[int] = mapped_column(SmallInteger, nullable=False)
     price: Mapped[float] = mapped_column(Numeric(10, 2), nullable=False)
     origin_price: Mapped[float | None] = mapped_column(Numeric(10, 2))
@@ -91,7 +91,7 @@ class Item(Base):
 class ItemImage(Base):
     __tablename__ = "item_images"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    item_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("items.id"), nullable=False)
+    item_id: Mapped[int] = mapped_column(Integer, ForeignKey("items.id"), nullable=False)
     url: Mapped[str] = mapped_column(String(255), nullable=False)
     sort: Mapped[int] = mapped_column(Integer, default=0)
     audit_status: Mapped[int] = mapped_column(SmallInteger, default=2)  # 开发环境默认通过
@@ -101,16 +101,16 @@ class Favorite(Base):
     __tablename__ = "favorites"
     __table_args__ = (UniqueConstraint("user_id", "item_id", name="uk_favorites_user_item"),)
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
-    item_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    user_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    item_id: Mapped[int] = mapped_column(Integer, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
 
 class Footprint(Base):
     __tablename__ = "footprints"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
-    item_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    user_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    item_id: Mapped[int] = mapped_column(Integer, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
 
@@ -118,9 +118,9 @@ class Conversation(Base):
     __tablename__ = "conversations"
     __table_args__ = (UniqueConstraint("buyer_id", "item_id", name="uk_conv_buyer_item"),)
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    item_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("items.id"), nullable=False)
-    buyer_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
-    seller_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    item_id: Mapped[int] = mapped_column(Integer, ForeignKey("items.id"), nullable=False)
+    buyer_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    seller_id: Mapped[int] = mapped_column(Integer, nullable=False)
     last_message_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     last_message: Mapped[str | None] = mapped_column(String(500))
     # 双方各自的已读时间：用于计算会话未读数（进入会话即回执已读）
@@ -131,8 +131,8 @@ class Conversation(Base):
 class Message(Base):
     __tablename__ = "messages"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    conversation_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("conversations.id"), index=True, nullable=False)
-    sender_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    conversation_id: Mapped[int] = mapped_column(Integer, ForeignKey("conversations.id"), index=True, nullable=False)
+    sender_id: Mapped[int] = mapped_column(Integer, nullable=False)
     msg_type: Mapped[str] = mapped_column(String(16), default="TEXT")
     content: Mapped[str] = mapped_column(Text, nullable=False)
     seq: Mapped[int] = mapped_column(Integer, default=0)
@@ -144,9 +144,9 @@ class Order(Base):
     __tablename__ = "orders"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     order_no: Mapped[str] = mapped_column(String(32), unique=True, nullable=False)
-    buyer_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
-    seller_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
-    item_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    buyer_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    seller_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    item_id: Mapped[int] = mapped_column(Integer, nullable=False)
     item_snapshot: Mapped[dict] = mapped_column(JSON, nullable=False)
     quantity: Mapped[int] = mapped_column(Integer, default=1)
     unit_price: Mapped[float] = mapped_column(Numeric(10, 2), nullable=False)
@@ -175,12 +175,12 @@ class Order(Base):
 class OrderStatusLog(Base):
     __tablename__ = "order_status_logs"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    order_id: Mapped[int] = mapped_column(BigInteger, index=True, nullable=False)
+    order_id: Mapped[int] = mapped_column(Integer, index=True, nullable=False)
     from_status: Mapped[str | None] = mapped_column(String(24))
     to_status: Mapped[str] = mapped_column(String(24), nullable=False)
     action: Mapped[str] = mapped_column(String(32), nullable=False)
     operator_type: Mapped[str] = mapped_column(String(16), nullable=False)
-    operator_id: Mapped[int | None] = mapped_column(BigInteger)
+    operator_id: Mapped[int | None] = mapped_column(Integer)
     operate_time: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     remark: Mapped[str | None] = mapped_column(String(255))
 
@@ -188,9 +188,9 @@ class OrderStatusLog(Base):
 class Review(Base):
     __tablename__ = "reviews"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    order_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
-    reviewer_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
-    target_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    order_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    reviewer_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    target_id: Mapped[int] = mapped_column(Integer, nullable=False)
     score: Mapped[int] = mapped_column(SmallInteger, nullable=False)
     tags: Mapped[str | None] = mapped_column(String(255))
     content: Mapped[str | None] = mapped_column(String(500))
@@ -202,9 +202,9 @@ class Review(Base):
 class Report(Base):
     __tablename__ = "reports"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    reporter_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    reporter_id: Mapped[int] = mapped_column(Integer, nullable=False)
     target_type: Mapped[str] = mapped_column(String(16), nullable=False)
-    target_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    target_id: Mapped[int] = mapped_column(Integer, nullable=False)
     reason_type: Mapped[str] = mapped_column(String(32), nullable=False)
     description: Mapped[str | None] = mapped_column(String(500))
     evidence: Mapped[str | None] = mapped_column(Text)

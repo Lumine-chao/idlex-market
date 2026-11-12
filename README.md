@@ -30,7 +30,7 @@ project1/
 
 | 端 | 技术 |
 | --- | --- |
-| 后端 | Python 3.11 · FastAPI · SQLAlchemy (Async) · SQLite (aiosqlite) · PyJWT · Argon2 |
+| 后端 | Python 3.11 · FastAPI · SQLAlchemy (Async) · MySQL 8.0 (aiomysql) · PyJWT · Argon2 |
 | 前端 | React 18 · TypeScript · Vite · Ant Design 5 · Zustand · React Router 6 |
 | 实时通信 | WebSocket（买家/卖家即时消息 + 未读推送） |
 
@@ -38,9 +38,22 @@ project1/
 
 ## 快速开始
 
+### 前置条件：MySQL 8.0
+
+默认连接串为 `mysql+aiomysql://idlex:idlex123456@127.0.0.1:3306/idlex`，首次运行前先建库建号（也可用环境变量 `DB_URL` 覆盖连接串）：
+
+```sql
+CREATE DATABASE idlex DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'idlex'@'%' IDENTIFIED BY 'idlex123456';
+GRANT ALL PRIVILEGES ON idlex.* TO 'idlex'@'%';
+FLUSH PRIVILEGES;
+```
+
+表结构与演示数据由后端启动时自动创建，无需手动导入。
+
 ### 方式 A：一键启动（推荐演示）
 
-双击根目录下的 `idlex/run.bat`，脚本会自动完成：创建后端虚拟环境 → 安装依赖 → 构建前端产物 → 后台启动服务并打开浏览器；需要关闭时双击 `idlex/stop.bat`。服务日志窗口已最小化在任务栏，点开即可查看。
+双击根目录下的 `idlex/run.bat`，脚本会自动完成：创建后端虚拟环境 → 安装依赖 → 构建前端产物 → 后台启动服务并打开浏览器；需要关闭时双击 `idlex/stop.bat`。服务日志窗口已最小化在任务栏，点开即可查看。请先确认本机 MySQL 已启动并按上文建好库。
 
 访问 <http://127.0.0.1:8000> 即可。后端会直接托管前端 `web/dist` 构建产物。
 
@@ -106,6 +119,6 @@ cd idlex/backend
 
 ## 关于数据
 
-仓库**不包含**依赖目录与运行时数据（`.venv/`、`node_modules/`、`dist/`、`*.db`、`uploads/` 均已通过 `.gitignore` 排除）。
+仓库**不包含**依赖目录与运行时数据（`.venv/`、`node_modules/`、`dist/`、`uploads/` 均已通过 `.gitignore` 排除）。
 
-后端启动时会自动执行 `seed_demo()`：建表并灌入分类树、敏感词库、管理员账号、演示账号与 **24 件演示商品**（覆盖全部六个一级分类）。因此**新克隆的仓库无需附带数据库即可直接运行**。种子逻辑按标题幂等，重复启动不会产生重复数据。
+后端启动时会自动执行 `seed_demo()`：建表并灌入分类树、敏感词库、管理员账号、演示账号与 **24 件演示商品**（覆盖全部六个一级分类）。因此**新克隆的仓库无需附带数据库文件，建好空库后启动即可**。种子逻辑按标题幂等，重复启动不会产生重复数据。

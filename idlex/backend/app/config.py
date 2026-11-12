@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     app_name: str = "闲置易二手交易平台"
-    db_url: str = "sqlite+aiosqlite:///./idlex.db"
+    db_url: str = "mysql+aiomysql://idlex:idlex123456@127.0.0.1:3306/idlex?charset=utf8mb4"
     secret_key: str = "idlex-dev-secret-key-change-in-prod"
     jwt_algorithm: str = "HS256"
     access_token_expire: int = 7200        # 2 小时

@@ -123,8 +123,9 @@ def _migrate_columns(conn):
 async def seed_demo():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-        # 轻量迁移：为既有 SQLite 库补齐后加的列（create_all 不会改已存在的表）
-        await conn.run_sync(_migrate_columns)
+        # 轻量迁移：仅旧版 SQLite 库需要补列（create_all 不会改已存在的表）
+        if engine.dialect.name == "sqlite":
+            await conn.run_sync(_migrate_columns)
 
     async with SessionLocal() as db:
         cnt = (await db.execute(select(models.Category))).scalars().all()
